@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -144,4 +145,18 @@ func deleteBook(w http.ResponseWriter, r *http.Request, id int) {
 
 	delete(books, id)
 	w.WriteHeader(http.StatusNoContent)
+}
+func searchBooksByTitle(w http.ResponseWriter, title string) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var results []Book
+	for _, b := range books {
+		if strings.Contains(strings.ToLower(b.Title), strings.ToLower(title)) {
+			results = append(results, b)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
 }
